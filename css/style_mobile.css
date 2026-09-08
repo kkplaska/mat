@@ -1,0 +1,21 @@
+/*#tresc {*/
+/*    background:red;*/
+/*}*/
+
+#search {
+    display: none;
+}
+
+#webContent {
+    width: auto;
+}
+
+#container {
+    width: 100%;
+    justify-content: normal;
+}
+
+body {
+    font-size: 15px;
+}
+

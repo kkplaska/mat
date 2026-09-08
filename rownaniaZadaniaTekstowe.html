@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pl">
+<!-- Chosen Palette: Warm Neutrals (Stone/Amber/Emerald/Rose) -->
+<!-- Application Structure Plan: The SPA is structured as an interactive learning dashboard ("Mat-Ninja Dojo"). It opens with a clear introduction and "Golden Rules" (flashcards) to establish foundational knowledge. The core content (the 7 problem types) is organized into a dynamic tabbed interface (vertical on desktop, horizontal scroll on mobile) to chunk information and prevent cognitive overload, allowing users to focus on one problem type at a time. A dedicated interactive "Concentration Simulator" uses Chart.js to visually teach the hardest concept (Type 7). Finally, an interactive checklist reinforces pre-test routines. -->
+<!-- Visualization & Content Choices: 
+1. Rules & Dictionary -> Inform -> Grid of interactive cards -> Easy scanning. 
+2. Task Types (1-6) -> Organize -> Tabbed Navigation -> Prevents long scrolls, isolates concepts. 
+3. Task Type 7 (Concentration) -> Change/Relationships -> Chart.js Donut Chart + Range Sliders -> Visually demonstrates how adding water/salt changes the ratio and total mass, proving the mathematical concept dynamically. No SVG/Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poradnik: Równania i Zadania Tekstowe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 320px;
+        }
+        .tab-btn.active {
+            background-color: #f5f5f4;
+            border-left: 4px solid #d97706;
+            font-weight: 700;
+            color: #92400e;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased leading-relaxed">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-stone-900 tracking-tight">Mat-Ninja <span class="text-amber-600 font-normal">Klasa 7</span></h1>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium text-stone-500">
+                <a href="#zasady" class="hover:text-amber-600 transition-colors">Złote Zasady</a>
+                <a href="#katalog" class="hover:text-amber-600 transition-colors">Katalog Pułapek</a>
+                <a href="#symulator" class="hover:text-amber-600 transition-colors">Symulator Stężeń</a>
+                <a href="#lista" class="hover:text-amber-600 transition-colors">Lista Kontrolna</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
+
+        <section id="intro" class="text-center max-w-3xl mx-auto space-y-4">
+            <h2 class="text-4xl font-extrabold text-stone-900">Równania i Zadania Tekstowe</h2>
+            <p class="text-lg text-stone-600">Ten interaktywny poradnik pomoże Ci omijać matematyczne pułapki i pewnie rozwiązywać zadania za pomocą równań. Pamiętaj: matematyka to język, a Ty jesteś tłumaczem!</p>
+        </section>
+
+        <section id="zasady" class="space-y-8 scroll-mt-24">
+            <div class="space-y-2">
+                <h3 class="text-2xl font-bold text-stone-800 border-b-2 border-amber-200 inline-block pb-1">CZĘŚĆ 1: Złote zasady rozwiązywania równań</h3>
+                <p class="text-stone-600">Zanim przejdziesz do trudnych zadań, upewnij się, że znasz te 6 fundamentów. To Twój ekwipunek na każdą kartkówkę.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">1. Metoda wagi szalkowej</div>
+                    <p class="text-stone-600 text-sm">Znak <strong>=</strong> to stan równowagi. Cokolwiek robisz po lewej stronie, musisz zrobić po prawej (np. jak odejmujesz 5, to musisz to zrobić z obu stron).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">2. Magiczna zasada mostu</div>
+                    <p class="text-stone-600 text-sm">Kiedy przenosisz liczbę lub <strong>x</strong> na drugą stronę znaku równości, <strong>ZAWSZE ZMIENIASZ ZNAK NA PRZECIWNY</strong> (+ na -, - na +).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">3. Zabijanie ułamków</div>
+                    <p class="text-stone-600 text-sm">Jeśli w równaniu masz ułamki, od razu pomnóż całe równanie przez ich wspólny mianownik. Ułamki znikną, a Ty unikniesz błędów!</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">4. Zasada nawiasów</div>
+                    <p class="text-stone-600 text-sm">Jeśli mnożysz wyrażenie składające się z dwóch elementów (np. wiek Zosi x+4 albo resztę zadań 20-x), <strong>zawsze bierz je w nawias</strong>.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">5. Zasada ołówka</div>
+                    <p class="text-stone-600 text-sm">Najpierw wypisz dane (zdefiniuj x), zrób rysunek lub tabelkę. Nigdy nie pisz równania „z głowy” po jednokrotnym przeczytaniu zadania.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-2">6. Ostatnie zdanie</div>
+                    <p class="text-stone-600 text-sm">Po wyliczeniu x, wróć do treści zadania. Upewnij się, czy pytali o x, czy może o coś, co musisz jeszcze doliczyć (np. wiek drugiej osoby).</p>
+                </div>
+            </div>
+
+            <div class="bg-stone-100 p-6 rounded-xl border border-stone-200 flex flex-col md:flex-row items-center gap-6">
+                <div class="md:w-1/3">
+                    <h4 class="text-xl font-bold text-stone-800">Słowniczek Tłumacza</h4>
+                    <p class="text-sm text-stone-500 mt-1">Polski -> Matematyka</p>
+                </div>
+                <div class="md:w-2/3 grid grid-cols-2 gap-4 text-sm">
+                    <div class="flex justify-between border-b border-stone-300 pb-1"><span>o 5 więcej</span><strong class="text-amber-600">+ 5</strong></div>
+                    <div class="flex justify-between border-b border-stone-300 pb-1"><span>o 5 mniej</span><strong class="text-amber-600">- 5</strong></div>
+                    <div class="flex justify-between border-b border-stone-300 pb-1"><span>5 razy więcej</span><strong class="text-amber-600">* 5</strong></div>
+                    <div class="flex justify-between border-b border-stone-300 pb-1"><span>5 razy mniej</span><strong class="text-amber-600">/ 5</strong></div>
+                    <div class="flex justify-between col-span-2 border-b border-stone-300 pb-1"><span>stanowi, wynosi, jest równe, to</span><strong class="text-amber-600">=</strong></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="katalog" class="space-y-6 scroll-mt-24">
+            <div class="space-y-2">
+                <h3 class="text-2xl font-bold text-stone-800 border-b-2 border-amber-200 inline-block pb-1">CZĘŚĆ 2: Katalog Pułapek i Kruczków</h3>
+                <p class="text-stone-600">Wybierz typ zadania z menu po lewej, aby odkryć najczęstsze błędy i sprytne triki do ich rozwiązania. To Twoje centrum dowodzenia przed sprawdzianem.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                
+                <div class="w-full md:w-1/3 bg-white rounded-xl border border-stone-200 overflow-hidden flex flex-col shadow-sm" id="tab-container">
+                    <button class="tab-btn active text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ1">
+                        1. Relacje cenowe
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ2">
+                        2. Wehikuł czasu (Wiek)
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ3">
+                        3. Punkty ujemne
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ4">
+                        4. Geometria
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ5">
+                        5. Procenty jako części
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 border-b border-stone-100 hover:bg-stone-50 transition-colors" data-target="typ6">
+                        6. Dwa sklepy
+                    </button>
+                    <button class="tab-btn text-left px-5 py-4 text-stone-600 hover:bg-stone-50 transition-colors" data-target="typ7">
+                        7. Stężenia (Boss)
+                    </button>
+                </div>
+
+                <div class="w-full md:w-2/3 bg-white rounded-xl border border-stone-200 p-6 lg:p-8 shadow-sm min-h-[400px]">
+                    
+                    <div id="typ1" class="tab-content active space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 1: Relacje cenowe i ilościowe</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm">
+                            Zadanie 1: Za 8 bułek i chleb Franek zapłacił 7,70 zł. Chleb jest 3 razy droższy od bułki.
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczek (Pułapka)</h5>
+                                <p class="text-rose-900 text-sm">Bardzo łatwo pomylić się na starcie i zapisać to jako <code class="bg-rose-100 px-1 rounded">8x + 3 = 7,70</code> (czyli pomylić „3 razy droższy” z „o 3 zł droższy”). Często zapomina się też, że chleb jest jeden, a bułek aż 8.</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick (Rozwiązanie)</h5>
+                                <p class="text-emerald-900 text-sm mb-2">Zawsze najpierw wypisuj dane z boku:</p>
+                                <ul class="list-disc list-inside text-sm text-emerald-900 space-y-1 ml-2 font-mono">
+                                    <li>Cena bułki: x</li>
+                                    <li>Cena chleba: 3x (bo 3 razy droższy)</li>
+                                    <li>Równanie: 8 * x + 1 * 3x = 7,70 => 11x = 7,70</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ2" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 2: Wehikuł czasu, czyli zadania o wieku</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm">
+                            Zadanie 2: Zosia jest o 4 lata starsza od Marka. Sześć lat temu razem mieli 24 lata. Ile lat ma obecnie Zosia, a ile Marek?
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczek (Pułapka)</h5>
+                                <p class="text-rose-900 text-sm">Możesz odruchowo ułożyć równanie: <code class="bg-rose-100 px-1 rounded">(x + 4) + x - 6 = 24</code>. <strong>BŁĄD!</strong> Odejmujesz w ten sposób 6 lat tylko raz, zapominając, że czas płynie dla każdego tak samo. Drugi błąd: wyliczenie 'x' i zapomnienie o doliczeniu wieku Zosi.</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick – Tabela Czasu</h5>
+                                <p class="text-emerald-900 text-sm mb-3">Zawsze rysuj tabelkę z kolumnami „Teraz” i „6 lat temu”:</p>
+                                <div class="overflow-x-auto mb-3">
+                                    <table class="w-full text-sm text-left text-emerald-900 bg-white border border-emerald-200">
+                                        <thead class="bg-emerald-100">
+                                            <tr>
+                                                <th class="px-4 py-2 border-b border-emerald-200">Osoba</th>
+                                                <th class="px-4 py-2 border-b border-emerald-200">Teraz</th>
+                                                <th class="px-4 py-2 border-b border-emerald-200">6 lat temu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="px-4 py-2 font-bold border-b border-emerald-100">Marek</td>
+                                                <td class="px-4 py-2 border-b border-emerald-100">x</td>
+                                                <td class="px-4 py-2 border-b border-emerald-100">x - 6</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-4 py-2 font-bold">Zosia</td>
+                                                <td class="px-4 py-2">x + 4</td>
+                                                <td class="px-4 py-2">(x + 4) - 6 = x - 2</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="text-emerald-900 text-sm font-mono">Równanie: (x - 6) + (x - 2) = 24</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ3" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 3: Punkty ujemne</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm">
+                            Zadanie 3: 20 zadań. Dobra odpowiedź: +3 pkt, zła/brak: -1 pkt. Wynik: 36 pkt.
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczek (Pułapka)</h5>
+                                <p class="text-rose-900 text-sm">Jak zapisać liczbę złych odpowiedzi? Złe to nie jest 'y' ani 'x-1'. Oznaczanie dwóch różnych niewiadomych to błąd w klasie 7.</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick – „Magiczna Reszta”</h5>
+                                <p class="text-emerald-900 text-sm mb-2">Jeśli wszystkich zadań jest 20, a dobrych jest x, to złe stanowią całą resztę, czyli <strong>(20 - x)</strong>.</p>
+                                <ul class="list-disc list-inside text-sm text-emerald-900 space-y-1 ml-2 font-mono">
+                                    <li>Dobre pkt: 3 * x</li>
+                                    <li>Stracone pkt: -1 * (20 - x)</li>
+                                    <li>Równanie: 3x - 1(20 - x) = 36</li>
+                                </ul>
+                                <p class="text-emerald-900 text-sm mt-2"><strong>Uwaga na znak:</strong> Minus przed nawiasem zmienia znaki w środku: 3x - 20 + x = 36.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ4" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 4: Geometria z niewiadomą</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm">
+                            Zadanie 4: Trapez, pole 28 cm², h = 4, jedna podstawa o 4 dłuższa od drugiej.
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczek (Pułapka)</h5>
+                                <p class="text-rose-900 text-sm">W tym typie zadań najczęściej pojawiają się błędy rachunkowe przy wzorze na pole trapezu P = (a+b)*h/2. Łatwo się zgubić przy skracaniu ułamka.</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick (Rozwiązanie)</h5>
+                                <p class="text-emerald-900 text-sm mb-2">Zrób rysunek. Oznacz górną podstawę jako x, a dolną jako x+4.</p>
+                                <ul class="list-disc list-inside text-sm text-emerald-900 space-y-1 ml-2 font-mono">
+                                    <li>Wzór: ((x + x + 4) * 4) / 2 = 28</li>
+                                    <li><strong>Trik na ułamki:</strong> Od razu skróć dwójkę z mianownika z czwórką (h):</li>
+                                    <li>(2x + 4) * 2 = 28 -> Rozwiązanie jest banalne!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ5" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 5: Procenty jako części całości</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm space-y-2">
+                            <p>Zadanie 5: 10% przechodniów zastanawia się, 5/6 odmówiło, a 8 osób kupiło. Ile osób ankietowano?</p>
+                            <p>Zadanie 6: Łąki to 40%, reszta (las) to 21 ha.</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczki (Pułapki)</h5>
+                                <p class="text-rose-900 text-sm mb-2">Zad 5: Zamiana 5/6 na procenty da nieskończony ułamek okresowy i błędny wynik.</p>
+                                <p class="text-rose-900 text-sm">Zad 6: Obliczanie 40% z 21 ha. 21 ha to nie całość, to reszta!</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick – Zasada równego boiska</h5>
+                                <p class="text-emerald-900 text-sm mb-2">Zad 5: Widzisz "brzydki" ułamek? Zamień procenty na ułamki zwykłe (10% = 1/10).</p>
+                                <ul class="list-disc list-inside text-sm text-emerald-900 space-y-1 ml-2 font-mono mb-4">
+                                    <li>1/10 + 5/6 = 3/30 + 25/30 = 28/30 = 14/15.</li>
+                                    <li>Pozostała reszta (zdecydowani) to 1/15, czyli 8 osób.</li>
+                                    <li>Całość = 8 * 15 = 120 osób.</li>
+                                </ul>
+                                <p class="text-emerald-900 text-sm mb-1"><strong>Zad 6 (Dopełnienie do 100%):</strong></p>
+                                <p class="text-emerald-900 text-sm ml-2 font-mono">Skoro łąki to 40%, las to 60%. Zatem: 0,60 * x = 21.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ6" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 6: Dwa sklepy i promocje</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 font-mono text-sm">
+                            Zadanie 8: Rower w sklepie A tańszy o 40 zł niż w B. Obniżki: w A o 10%, w B o 120 zł. Ceny po obniżce są równe.
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">Kruczek (Pułapka)</h5>
+                                <p class="text-rose-900 text-sm">Złe przypisanie ceny początkowej. Gdzie było taniej, a gdzie drożej? Kolejny błąd to zapomnienie o końcowym pytaniu - wyliczenie x daje cenę początkową, a pytają o promocyjną.</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Tip & Trick (Rozwiązanie)</h5>
+                                <p class="text-emerald-900 text-sm mb-2">Niech x to cena w sklepie B (który jest droższy). Cena w A to x - 40.</p>
+                                <ul class="list-disc list-inside text-sm text-emerald-900 space-y-1 ml-2 font-mono">
+                                    <li>Nowa cena B: x - 120</li>
+                                    <li>Nowa cena A (płacimy 90%): 0,9 * (x - 40)</li>
+                                    <li>Równanie: 0,9(x - 40) = x - 120</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="typ7" class="tab-content space-y-6">
+                        <h4 class="text-xl font-bold text-stone-800">TYP 7: Stężenia (Boss Ostateczny)</h4>
+                        <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-amber-400 font-mono text-sm font-bold text-center">
+                            Złota Zasada: Masa_Substancji = stężenie * Masa_Całego_Roztworu
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-700 mb-1">KRUCZEK ABSOLUTNY</h5>
+                                <p class="text-rose-900 text-sm">Możesz przez pomyłkę założyć, że dodana sól zwiększa tylko ilość soli. Nie zapomnij, że dodana sól <strong>zwiększa też ciężar całego naczynia</strong> (roztworu)!</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                <h5 class="font-bold text-emerald-700 mb-1">Trick „Pudełkowy”</h5>
+                                <p class="text-emerald-900 text-sm">Zapisz masę soli przed zmianą i po zmianie – muszą one być równe, jeśli tylko dolewasz/odparowujesz wodę. Woda paruje, sól zostaje!</p>
+                            </div>
+                            <p class="text-sm font-medium text-stone-600 text-center mt-4">Przejdź do Symulatora poniżej, aby zrozumieć to wizualnie!</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="symulator" class="bg-white rounded-2xl border border-stone-200 shadow-md overflow-hidden scroll-mt-24">
+            <div class="bg-amber-50 px-6 py-4 border-b border-amber-100">
+                <h3 class="text-2xl font-bold text-amber-900">Symulator Stężeń</h3>
+                <p class="text-amber-700 text-sm mt-1">Interaktywne laboratorium. Zobacz jak dosypywanie soli i dolewanie wody zmienia stężenie. Obserwuj wykres, aby zrozumieć, że sól zajmuje fizyczne miejsce w całkowitej masie!</p>
+            </div>
+            
+            <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-12 items-center">
+                
+                <div class="w-full lg:w-1/2 space-y-8">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <label for="waterInput" class="font-bold text-blue-600">Woda w naczyniu (g)</label>
+                            <span id="waterVal" class="font-mono text-lg font-bold text-blue-700">180 g</span>
+                        </div>
+                        <input type="range" id="waterInput" min="10" max="500" value="180" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <p class="text-xs text-stone-500">Zmienia masę całkowitą, ale nie zmienia masy soli.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <label for="saltInput" class="font-bold text-stone-500">Sól w naczyniu (g)</label>
+                            <span id="saltVal" class="font-mono text-lg font-bold text-stone-600">20 g</span>
+                        </div>
+                        <input type="range" id="saltInput" min="0" max="100" value="20" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-500">
+                        <p class="text-xs text-stone-500 text-rose-600 font-medium">Zmienia masę soli ORAZ masę całkowitą!</p>
+                    </div>
+
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 mt-4">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <p class="text-xs font-bold text-stone-500 uppercase tracking-wide">Masa Całkowita</p>
+                                <p id="totalMass" class="text-2xl font-mono font-bold text-stone-800">200 g</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-amber-700 uppercase tracking-wide">Stężenie</p>
+                                <p id="concentrationOutput" class="text-2xl font-mono font-bold text-amber-600">10.0%</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center text-sm font-mono text-stone-600 border-t border-amber-200 pt-3">
+                            <span id="formulaText">20 g / 200 g * 100% = 10.0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 flex justify-center">
+                    <div class="chart-container">
+                        <canvas id="solutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lista" class="max-w-2xl mx-auto space-y-6 pb-12 scroll-mt-24">
+            <div class="text-center space-y-2">
+                <h3 class="text-2xl font-bold text-stone-800">Złota Lista Kontrolna</h3>
+                <p class="text-stone-600">Przed oddaniem kartkówki zaznacz wszystkie punkty. Tylko wtedy masz pewność, że uniknąłeś błędów.</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-stone-200 p-6 shadow-sm space-y-4">
+                <label class="flex items-start gap-4 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-stone-100">
+                    <input type="checkbox" class="w-6 h-6 mt-0.5 text-amber-600 rounded border-stone-300 focus:ring-amber-500 checklist-item">
+                    <div>
+                        <span class="font-bold text-stone-800 block">Czy zdefiniowałem x?</span>
+                        <span class="text-sm text-stone-500">Nigdy nie pisz równania bez wypisania z boku, czym dokładnie jest x.</span>
+                    </div>
+                </label>
+                
+                <label class="flex items-start gap-4 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-stone-100">
+                    <input type="checkbox" class="w-6 h-6 mt-0.5 text-amber-600 rounded border-stone-300 focus:ring-amber-500 checklist-item">
+                    <div>
+                        <span class="font-bold text-stone-800 block">Czy użyłem nawiasów?</span>
+                        <span class="text-sm text-stone-500">Są niezbędne, jeśli mnożysz wyrażenia typu x+4 lub 20-x.</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-4 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-stone-100">
+                    <input type="checkbox" class="w-6 h-6 mt-0.5 text-amber-600 rounded border-stone-300 focus:ring-amber-500 checklist-item">
+                    <div>
+                        <span class="font-bold text-stone-800 block">Czy przeczytałem ostatnie zdanie?</span>
+                        <span class="text-sm text-stone-500">Upewnij się, że odpowiadasz na pytanie. Jeśli x to cena bułki, a pytają o cenę chleba, to musisz wykonać dodatkowe obliczenie!</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-4 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-stone-100">
+                    <input type="checkbox" class="w-6 h-6 mt-0.5 text-amber-600 rounded border-stone-300 focus:ring-amber-500 checklist-item">
+                    <div>
+                        <span class="font-bold text-stone-800 block">Czy wynik ma sens życiowy?</span>
+                        <span class="text-sm text-stone-500">Jeśli ludzi wyszło 15,5 albo cena jest na minusie - zacznij szukać błędu.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="successMessage" class="hidden bg-emerald-50 text-emerald-800 text-center p-4 rounded-xl border border-emerald-200 font-bold">
+                Jesteś gotowy na sprawdzian! Powodzenia!
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-8 text-center text-stone-500 text-sm mt-8">
+        <p>Mat-Ninja &copy; Interaktywny Poradnik dla Klasy 7</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    const targetId = btn.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            const waterInput = document.getElementById('waterInput');
+            const saltInput = document.getElementById('saltInput');
+            const waterValDisplay = document.getElementById('waterVal');
+            const saltValDisplay = document.getElementById('saltVal');
+            const totalMassDisplay = document.getElementById('totalMass');
+            const concentrationOutput = document.getElementById('concentrationOutput');
+            const formulaText = document.getElementById('formulaText');
+
+            const ctx = document.getElementById('solutionChart').getContext('2d');
+            let solutionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Woda (g)', 'Sól (g)'],
+                    datasets: [{
+                        data: [180, 20],
+                        backgroundColor: ['#3b82f6', '#78716c'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + 'g';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateSimulator() {
+                const water = parseInt(waterInput.value);
+                const salt = parseInt(saltInput.value);
+                const total = water + salt;
+                
+                let concentration = 0;
+                if(total > 0) {
+                    concentration = (salt / total) * 100;
+                }
+
+                waterValDisplay.textContent = water + ' g';
+                saltValDisplay.textContent = salt + ' g';
+                totalMassDisplay.textContent = total + ' g';
+                concentrationOutput.textContent = concentration.toFixed(1) + '%';
+                
+                formulaText.textContent = `${salt} g / ${total} g * 100% = ${concentration.toFixed(1)}%`;
+
+                solutionChart.data.datasets[0].data = [water, salt];
+                solutionChart.update();
+            }
+
+            waterInput.addEventListener('input', updateSimulator);
+            saltInput.addEventListener('input', updateSimulator);
+            updateSimulator();
+
+            const checkboxes = document.querySelectorAll('.checklist-item');
+            const successMessage = document.getElementById('successMessage');
+
+            function checkAllCompleted() {
+                let allChecked = true;
+                checkboxes.forEach(cb => {
+                    if(!cb.checked) allChecked = false;
+                });
+                
+                if(allChecked) {
+                    successMessage.classList.remove('hidden');
+                } else {
+                    successMessage.classList.add('hidden');
+                }
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', checkAllCompleted);
+            });
+        });
+    </script>
+</body>
+</html>
